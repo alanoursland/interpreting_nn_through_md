@@ -14,7 +14,7 @@ N = 10
 num_samples = 1000
 trials=20
 
-results_dir = Path("results/md_2d/")
+results_dir = Path("results/md_10d/")
 models_dir = results_dir / "models"
 models_dir.mkdir(parents=True, exist_ok=True)
 
