@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 # results
-results/
+src/results/
 
 # C extensions
 *.so
