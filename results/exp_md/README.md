@@ -39,6 +39,34 @@ Three model architectures (`MD_Abs`, `MD_ReLU`, `MD_Sigmoid`) are implemented an
     * **Architecture:** `Linear(d -> 2d)` -> `Sigmoid` -> `Square` -> `Sum` -> `Sqrt`
     * **Justification:** This model is included as a baseline using a traditional activation function. To maintain structural parallelism with the `MD_ReLU` model for comparison, it also uses $2d$ nodes in its linear layer, notionally attempting to capture deviations on both positive and negative sides similar to how ReLU pairs aim to mimic the absolute value function. However, unlike Abs and ReLU, the Sigmoid activation lacks a direct theoretical basis for representing distance components or effectively mimicking the absolute value function required by the subsequent `Square -> Sum -> Sqrt` operations (which derive their meaning from the Mahalanobis distance calculation). Due to Sigmoid's saturating nature and output range (0 to 1), **this architecture is not expected to perform well** in accurately approximating the Mahalanobis distance. Its inclusion primarily serves to contrast the performance of the theoretically motivated architectures (Abs, ReLU) against a standard activation function placed within the same distance-approximating computational graph.
 
+Absolutely — here's a polished and mathematically accurate version of your explanation, keeping your intent and structure but refining the math description and clarity:
+
+### **Ground Truth Model**
+
+We construct a **ground truth model** by explicitly initializing the linear layer of `MD_Abs` using the known eigendecomposition of the synthetic Gaussian distribution. This serves as a direct implementation of the Mahalanobis distance from first principles.
+
+Specifically:
+
+- The **weight matrix** is set as  
+  \[
+  W = \Lambda^{-1/2} V^\top
+  \]  
+  where \( V \in \mathbb{R}^{d \times d} \) contains the eigenvectors of the covariance matrix \( \Sigma \) as columns, and \( \Lambda \in \mathbb{R}^{d \times d} \) is a diagonal matrix of corresponding eigenvalues. This transformation whitens the data by projecting it onto the scaled principal component axes.
+
+- The **bias vector** is set to  
+  \[
+  b = -W \mu
+  \]  
+  ensuring that the transformed space is centered around the mean \( \mu \), and each linear hyperplane passes exactly through the center of the Gaussian distribution.
+
+This model is **not trained**; it is constructed analytically and used as a reference to:
+
+- **Validate** analysis metrics such as whitening accuracy, Mahalanobis error, and eigenvector alignment.
+- **Benchmark** trained models against the theoretical ideal they are designed to approximate.
+- **Visualize** exact Mahalanobis directions and decision boundaries in 2D, providing intuitive insight into feature space geometry.
+
+By analytically encoding the Mahalanobis distance within the `MD_Abs` architecture, the ground truth model serves as a constructive proof-of-concept for the proposed interpretability framework.
+
 ---
 
 ## Training and Test Data
