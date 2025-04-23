@@ -252,46 +252,46 @@ def summarize_trials(results_dir="results/learn_md", model_types=("relu", "abs",
 
 # summarize_trials()
 
-N, mean, cov, eigvals_sorted, eigvecs_sorted = torch.load("results/learn_md/data_model.pt")
+# N, mean, cov, eigvals_sorted, eigvecs_sorted = torch.load("results/learn_md/data_model.pt")
 
-rlu_model = load_model(MD_ReLU, N, "results/learn_md/relu_model.pt")
-abs_model = load_model(MD_Abs, N, "results/learn_md/abs_model.pt")
-sig_model = load_model(MD_Sigmoid, N, "results/learn_md/sigmoid_model.pt")
+# rlu_model = load_model(MD_ReLU, N, "results/learn_md/relu_model.pt")
+# abs_model = load_model(MD_Abs, N, "results/learn_md/abs_model.pt")
+# sig_model = load_model(MD_Sigmoid, N, "results/learn_md/sigmoid_model.pt")
 
-rlu_eigvals, rlu_eigvecs, rlu_eigsort = recover_sorted_eigenstructure(rlu_model)
-abs_eigvals, abs_eigvecs, abs_eigsort = recover_sorted_eigenstructure(abs_model)
-sig_eigvals, sig_eigvecs, sig_eigsort = recover_sorted_eigenstructure(sig_model)
+# rlu_eigvals, rlu_eigvecs, rlu_eigsort = recover_sorted_eigenstructure(rlu_model)
+# abs_eigvals, abs_eigvecs, abs_eigsort = recover_sorted_eigenstructure(abs_model)
+# sig_eigvals, sig_eigvecs, sig_eigsort = recover_sorted_eigenstructure(sig_model)
 
-rlu_fro_norm = test_whitening(rlu_model.linear.weight.detach(), cov)
-abs_fro_norm = test_whitening(abs_model.linear.weight.detach(), cov)
-sig_fro_norm = test_whitening(sig_model.linear.weight.detach(), cov)
+# rlu_fro_norm = test_whitening(rlu_model.linear.weight.detach(), cov)
+# abs_fro_norm = test_whitening(abs_model.linear.weight.detach(), cov)
+# sig_fro_norm = test_whitening(sig_model.linear.weight.detach(), cov)
 
-print(f"Distance to Mean")
-print(f"\t ReLU    {distance_from_mean_to_hyperplanes(rlu_model, mean)}")
-print(f"\t Abs     {distance_from_mean_to_hyperplanes(abs_model, mean)}")
-print(f"\t Sigmoid {distance_from_mean_to_hyperplanes(sig_model, mean)}")
+# print(f"Distance to Mean")
+# print(f"\t ReLU    {distance_from_mean_to_hyperplanes(rlu_model, mean)}")
+# print(f"\t Abs     {distance_from_mean_to_hyperplanes(abs_model, mean)}")
+# print(f"\t Sigmoid {distance_from_mean_to_hyperplanes(sig_model, mean)}")
 
-print(f"Eigenvalues from weights")
-print(f"\t ReLU    {rlu_eigvals}")
-print(f"\t Abs     {abs_eigvals}")
-print(f"\t Sigmoid {sig_eigvals}")
-print(f"\t Actual  {eigvals_sorted}")
+# print(f"Eigenvalues from weights")
+# print(f"\t ReLU    {rlu_eigvals}")
+# print(f"\t Abs     {abs_eigvals}")
+# print(f"\t Sigmoid {sig_eigvals}")
+# print(f"\t Actual  {eigvals_sorted}")
 
-print(f"Eigenvectors from weights")
-print(f"\t ReLU    {rlu_eigvecs}")
-print(f"\t Abs     {abs_eigvecs}")
-print(f"\t Sigmoid {sig_eigvecs}")
-print(f"\t Actual  {eigvecs_sorted}")
+# print(f"Eigenvectors from weights")
+# print(f"\t ReLU    {rlu_eigvecs}")
+# print(f"\t Abs     {abs_eigvecs}")
+# print(f"\t Sigmoid {sig_eigvecs}")
+# print(f"\t Actual  {eigvecs_sorted}")
 
-print(f"Whitening Frobius norms")
-print(f"\t ReLU    {rlu_fro_norm}")
-print(f"\t Abs     {abs_fro_norm}")
-print(f"\t Sigmoid {sig_fro_norm}")
+# print(f"Whitening Frobius norms")
+# print(f"\t ReLU    {rlu_fro_norm}")
+# print(f"\t Abs     {abs_fro_norm}")
+# print(f"\t Sigmoid {sig_fro_norm}")
 
-print(f"Mahalanbois Frobius norms")
-print(f"\t ReLU    {test_mahalanobis_match(rlu_model.linear.weight.detach(), cov)}")
-print(f"\t Abs     {test_mahalanobis_match(abs_model.linear.weight.detach(), cov)}")
-print(f"\t Sigmoid {test_mahalanobis_match(sig_model.linear.weight.detach(), cov)}")
+# print(f"Mahalanbois Frobius norms")
+# print(f"\t ReLU    {test_mahalanobis_match(rlu_model.linear.weight.detach(), cov)}")
+# print(f"\t Abs     {test_mahalanobis_match(abs_model.linear.weight.detach(), cov)}")
+# print(f"\t Sigmoid {test_mahalanobis_match(sig_model.linear.weight.detach(), cov)}")
 
 
 # print(f"Eigenvector Similarity")
@@ -311,9 +311,9 @@ print(f"\t Sigmoid {test_mahalanobis_match(sig_model.linear.weight.detach(), cov
 # print(f"\t Abs:     {abs_sim_matrix}")
 # print(f"\t Sigmoid: {sig_sim_matrix}")
 
-num_samples = 1000
-x = torch.distributions.MultivariateNormal(mean, covariance_matrix=cov).sample((num_samples,))
-y = mahalanobis_distance(x, mean, eigvals_sorted, eigvecs_sorted)
+# num_samples = 1000
+# x = torch.distributions.MultivariateNormal(mean, covariance_matrix=cov).sample((num_samples,))
+# y = mahalanobis_distance(x, mean, eigvals_sorted, eigvecs_sorted)
 
 def eval_model(model, x, y):
     model.eval()
@@ -321,9 +321,9 @@ def eval_model(model, x, y):
     loss = F.mse_loss(y_pred, y).item()
     print(f"{type(model).__name__} model loss on new data: {loss:.6f}")
 
-eval_model(rlu_model, x, y)
-eval_model(abs_model, x, y)
-eval_model(sig_model, x, y)
+# eval_model(rlu_model, x, y)
+# eval_model(abs_model, x, y)
+# eval_model(sig_model, x, y)
 
 def plot_2d_data(x):
     plt.figure(figsize=(6, 6))
@@ -417,6 +417,6 @@ def plot_model_hyperplanes(x, mean, model, title="Model Hyperplanes", filename=N
         plt.show()
 
 
-plot_model_hyperplanes(x, mean, rlu_model, "ReLU Decision Boundaries", "results/learn_md/hyperplane_plots/relu_boundaries.png")
-plot_model_hyperplanes(x, mean, abs_model, "Abs Decision Boundaries", "results/learn_md/hyperplane_plots/abs_boundaries.png")
-plot_model_hyperplanes(x, mean, sig_model, "Sigmoid Decision Boundaries", "results/learn_md/hyperplane_plots/sigmoid_boundaries.png")
+# plot_model_hyperplanes(x, mean, rlu_model, "ReLU Decision Boundaries", "results/learn_md/hyperplane_plots/relu_boundaries.png")
+# plot_model_hyperplanes(x, mean, abs_model, "Abs Decision Boundaries", "results/learn_md/hyperplane_plots/abs_boundaries.png")
+# plot_model_hyperplanes(x, mean, sig_model, "Sigmoid Decision Boundaries", "results/learn_md/hyperplane_plots/sigmoid_boundaries.png")
