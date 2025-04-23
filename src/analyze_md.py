@@ -139,7 +139,44 @@ def test_whitening(W, cov, label="W", verbose=True):
 
     return fro_norm
 
-def test_mahalanobis_match(W, cov, label="W", verbose=True, deduplicate=True, cos_threshold=0.999):
+def test_sphericity(W, cov, label, verbose=True):
+    """
+    Test whether the learned weights transform the input covariance structure into a spherical distribution.
+    
+    Args:
+        model: The neural network model with a linear layer
+        cov: The covariance matrix of the input distribution
+    
+    Returns:
+        sphericity_error: Frobenius norm measuring deviation from perfect sphericity
+        eigenvalues: Eigenvalues of the transformed covariance matrix (normalized)
+    """
+    # Compute the transformed covariance matrix WΣW^T
+    transformed_cov = W @ cov @ W.T
+    
+    # Calculate the mean of the diagonal elements (average variance along each dimension)
+    diag_mean = torch.mean(torch.diag(transformed_cov))
+
+    # Normalize by the mean diagonal to measure sphericity, not just whitening
+    # A perfectly spherical distribution would have all eigenvalues equal after this normalization
+    normalized_cov = transformed_cov / diag_mean
+    
+    identity = torch.eye(normalized_cov.shape[0], device=W.device)
+
+    # Compute deviation from the identity matrix as fro_norm (perfect sphericity)
+    sphericity_error = torch.norm(normalized_cov - identity, 'fro')
+    
+    # Compute eigenvalues for further analysis
+    eigenvalues = torch.linalg.eigvalsh(normalized_cov)
+    
+    if verbose:
+        print(f"[{label}] Sphericity Test:")
+        print(f"  Frobenius norm ||WΣWᵀ/mean(diag(WΣWᵀ)) - I||_F = {sphericity_error:.6f}")
+        print(f"  Eigenvalues of normalized WΣWᵀ: {eigenvalues.tolist()}")
+    
+    return sphericity_error, eigenvalues
+
+def test_mahalanobis_match(W, cov, label, verbose=True, deduplicate=True, cos_threshold=0.999):
     """
     Check if W^T W ≈ Σ⁻¹, optionally deduplicating mirror vectors.
 
@@ -250,80 +287,11 @@ def summarize_trials(results_dir="results/learn_md", model_types=("relu", "abs",
 
     return summary, best_models
 
-# summarize_trials()
-
-# N, mean, cov, eigvals_sorted, eigvecs_sorted = torch.load("results/learn_md/data_model.pt")
-
-# rlu_model = load_model(MD_ReLU, N, "results/learn_md/relu_model.pt")
-# abs_model = load_model(MD_Abs, N, "results/learn_md/abs_model.pt")
-# sig_model = load_model(MD_Sigmoid, N, "results/learn_md/sigmoid_model.pt")
-
-# rlu_eigvals, rlu_eigvecs, rlu_eigsort = recover_sorted_eigenstructure(rlu_model)
-# abs_eigvals, abs_eigvecs, abs_eigsort = recover_sorted_eigenstructure(abs_model)
-# sig_eigvals, sig_eigvecs, sig_eigsort = recover_sorted_eigenstructure(sig_model)
-
-# rlu_fro_norm = test_whitening(rlu_model.linear.weight.detach(), cov)
-# abs_fro_norm = test_whitening(abs_model.linear.weight.detach(), cov)
-# sig_fro_norm = test_whitening(sig_model.linear.weight.detach(), cov)
-
-# print(f"Distance to Mean")
-# print(f"\t ReLU    {distance_from_mean_to_hyperplanes(rlu_model, mean)}")
-# print(f"\t Abs     {distance_from_mean_to_hyperplanes(abs_model, mean)}")
-# print(f"\t Sigmoid {distance_from_mean_to_hyperplanes(sig_model, mean)}")
-
-# print(f"Eigenvalues from weights")
-# print(f"\t ReLU    {rlu_eigvals}")
-# print(f"\t Abs     {abs_eigvals}")
-# print(f"\t Sigmoid {sig_eigvals}")
-# print(f"\t Actual  {eigvals_sorted}")
-
-# print(f"Eigenvectors from weights")
-# print(f"\t ReLU    {rlu_eigvecs}")
-# print(f"\t Abs     {abs_eigvecs}")
-# print(f"\t Sigmoid {sig_eigvecs}")
-# print(f"\t Actual  {eigvecs_sorted}")
-
-# print(f"Whitening Frobius norms")
-# print(f"\t ReLU    {rlu_fro_norm}")
-# print(f"\t Abs     {abs_fro_norm}")
-# print(f"\t Sigmoid {sig_fro_norm}")
-
-# print(f"Mahalanbois Frobius norms")
-# print(f"\t ReLU    {test_mahalanobis_match(rlu_model.linear.weight.detach(), cov)}")
-# print(f"\t Abs     {test_mahalanobis_match(abs_model.linear.weight.detach(), cov)}")
-# print(f"\t Sigmoid {test_mahalanobis_match(sig_model.linear.weight.detach(), cov)}")
-
-
-# print(f"Eigenvector Similarity")
-# # print(f"\t ReLU    {compare_eigenvectors_cosine(rlu_eigvecs, eigvecs_sorted)}")
-# print(f"\t Abs     {compare_eigenvectors_cosine(abs_eigvecs, eigvecs_sorted)}")
-# print(f"\t Sigmoid {compare_eigenvectors_cosine(sig_eigvecs, eigvecs_sorted)}")
-
-# relu1_perm, relu1_sims, relu1_sim_matrix = match_eigenvectors_optimal(abs_eigvecs[:N], eigvecs_sorted)
-# relu2_perm, relu2_sims, relu2_sim_matrix = match_eigenvectors_optimal(abs_eigvecs[N:], eigvecs_sorted)
-# abs_perm, abs_sims, abs_sim_matrix = match_eigenvectors_optimal(abs_eigvecs, eigvecs_sorted)
-# abs_perm, abs_sims, abs_sim_matrix = match_eigenvectors_optimal(abs_eigvecs, eigvecs_sorted)
-# sig_perm, sig_sims, sig_sim_matrix = match_eigenvectors_optimal(sig_eigvecs, eigvecs_sorted)
-
-# print(f"Eigenvector Similarity")
-# print(f"\t ReLU0:     {relu1_sim_matrix}")
-# print(f"\t ReLU1:     {relu2_sim_matrix}")
-# print(f"\t Abs:     {abs_sim_matrix}")
-# print(f"\t Sigmoid: {sig_sim_matrix}")
-
-# num_samples = 1000
-# x = torch.distributions.MultivariateNormal(mean, covariance_matrix=cov).sample((num_samples,))
-# y = mahalanobis_distance(x, mean, eigvals_sorted, eigvecs_sorted)
-
-def eval_model(model, x, y):
+def eval_model(model, x, y, label):
     model.eval()
     y_pred = model(x)
     loss = F.mse_loss(y_pred, y).item()
-    print(f"{type(model).__name__} model loss on new data: {loss:.6f}")
-
-# eval_model(rlu_model, x, y)
-# eval_model(abs_model, x, y)
-# eval_model(sig_model, x, y)
+    print(f"{label} model loss on new data: {loss:.6f}")
 
 def plot_2d_data(x):
     plt.figure(figsize=(6, 6))
@@ -416,7 +384,26 @@ def plot_model_hyperplanes(x, mean, model, title="Model Hyperplanes", filename=N
     else:
         plt.show()
 
-
-# plot_model_hyperplanes(x, mean, rlu_model, "ReLU Decision Boundaries", "results/learn_md/hyperplane_plots/relu_boundaries.png")
-# plot_model_hyperplanes(x, mean, abs_model, "Abs Decision Boundaries", "results/learn_md/hyperplane_plots/abs_boundaries.png")
-# plot_model_hyperplanes(x, mean, sig_model, "Sigmoid Decision Boundaries", "results/learn_md/hyperplane_plots/sigmoid_boundaries.png")
+def make_ground_truth_model(mean, eigvecs, eigvals):
+    """
+    Constructs an MD_Abs model that computes Mahalanobis distance using PCA components.
+    
+    Args:
+        mean (Tensor): Mean vector (shape: [d])
+        eigvecs (Tensor): Matrix of eigenvectors (shape: [d, d], column-wise)
+        eigvals (Tensor): Vector of eigenvalues (shape: [d])
+    
+    Returns:
+        MD_Abs: A model initialized to compute Mahalanobis distance from mean and covariance.
+    """
+    input_dim = mean.shape[0]
+    
+    # Whitening: W = diag(1 / sqrt(λ)) @ Vᵀ
+    W = torch.diag(1.0 / torch.sqrt(eigvals)) @ eigvecs.T  # shape: [d, d]
+    
+    # Bias: b = -W @ μ
+    b = -W @ mean  # shape: [d]
+    
+    # Create the model
+    model = MD_Abs(input_dim, weight=W, bias=b)
+    return model
