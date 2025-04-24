@@ -1,0 +1,67 @@
+Finding best models:
+RELU - Mean: 0.028442, Var: 0.001942, Min: 0.000002, Max: 0.207986
+ABS - Mean: 0.121969, Var: 0.009943, Min: 0.000000, Max: 0.206898
+SIGMOID - Mean: 0.267484, Var: 0.000007, Min: 0.262260, Max: 0.271883
+Best relu model copied from results\md_2d\models\10
+Best abs model copied from results\md_2d\models\18
+Best sigmoid model copied from results\md_2d\models\10
+
+Mirrored Weight Detection Summary
+         ReLU    2 out of 4 vectors
+         Abs     0 out of 2 vectors
+         Sigmoid 0 out of 4 vectors
+         Ground  0 out of 2 vectors
+
+Distance to Mean
+         ReLU    tensor([0.0010, 0.0016, 0.0011, 0.0012], device='cuda:0')
+         Abs     tensor([1.4759e-06, 2.2756e-04], device='cuda:0')
+         Sigmoid tensor([ 0.4870,  0.5776, 13.9445,  0.7912], device='cuda:0')
+         Ground  tensor([0., 0.], device='cuda:0')
+
+Sphericity Frobius norms
+         ReLU    0.0065780626609921455
+         Abs     2.2417298168875277e-05
+         Sigmoid 3.346174716949463
+         Ground  9.186903753288789e-07
+
+Eigenvalues from weights
+         ReLU    tensor([0.8363, 0.8268, 0.1263, 0.1258], device='cuda:0')
+         Abs     tensor([0.4006, 0.1497], device='cuda:0')
+         Sigmoid tensor([2.3048e+01, 5.6233e-02, 3.4851e-02, 2.0811e-02], device='cuda:0')
+         Ground  tensor([1.0000, 0.1223], device='cuda:0')
+         Actual  tensor([1.0000, 0.1223], device='cuda:0')
+
+Eigenvectors from weights
+         ReLU    tensor([[ 0.3605,  0.9328],
+        [-0.3502, -0.9367],
+        [ 0.7279, -0.6857],
+        [-0.7276,  0.6860]], device='cuda:0')
+         Abs     tensor([[ 0.1568, -0.9876],
+        [-0.8035,  0.5953]], device='cuda:0')
+         Sigmoid tensor([[-0.9866, -0.1629],
+        [ 0.6576,  0.7534],
+        [ 0.9755, -0.2199],
+        [-0.9564, -0.2921]], device='cuda:0')
+         Ground  tensor([[ 0.7279,  0.6857],
+        [-0.6857,  0.7279]], device='cuda:0')
+         Actual  tensor([[ 0.7279, -0.6857],
+        [ 0.6857,  0.7279]], device='cuda:0')
+
+ReLU model loss on new data: 0.000001
+Abs model loss on new data: 0.000000
+Sigmoid model loss on new data: 0.269654
+Ground model loss on new data: 0.000000
+
+Analysis across runs:
+RELU INTERPRETABILITY SUMMARY
+  Mirrored count: Mean = 0.400000, Std = 0.598243, Min = 0.000000, Max = 2.000000
+  Mean dist: Mean = 0.373910, Std = 0.457146, Min = 0.001209, Max = 1.538534
+  Sphericity: Mean = 1.896936, Std = 0.564264, Min = 0.006578, Max = 2.521451
+ABS INTERPRETABILITY SUMMARY
+  Mirrored count: Mean = 0.000000, Std = 0.000000, Min = 0.000000, Max = 0.000000
+  Mean dist: Mean = 1.005610, Std = 1.279784, Min = 0.000039, Max = 4.503246
+  Sphericity: Mean = 0.846792, Std = 0.709224, Min = 0.000010, Max = 1.414178
+SIGMOID INTERPRETABILITY SUMMARY
+  Mirrored count: Mean = 0.000000, Std = 0.000000, Min = 0.000000, Max = 0.000000
+  Mean dist: Mean = 3.571594, Std = 1.794141, Min = 1.912420, Max = 10.302243
+  Sphericity: Mean = 3.410054, Std = 0.034932, Min = 3.321180, Max = 3.449016
