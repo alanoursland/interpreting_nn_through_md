@@ -121,7 +121,7 @@ Each model was trained using the following standard procedure:
 * **Loss Function:** Mean Squared Error (MSE) loss (`nn.MSELoss`), calculated between the model's predicted distance and the true Mahalanobis distance $D_M(x)$.
 * **Device:** Training was performed on a CUDA-enabled GPU if available, otherwise on the CPU.
 * **Data Handling:** Training utilized **full-batch gradient descent** (i.e., the entire training dataset was processed in each epoch). Given that the data is synthetically generated from a Gaussian distribution, which inherently lacks heavy tails and extreme outliers, the gradient computed on the full batch provides a stable estimate of the true gradient. This simplifies the optimization dynamics compared to mini-batch or stochastic approaches, aligning with the experiment's focus on analyzing the converged state and learned parameters in a controlled setting.
-* **Convergence:** **Although a fixed number of epochs was used, the training loss was monitored and consistently observed to plateau well before the 10,000 epoch limit for successful runs, indicating stable convergence.**
+* **Convergence:** An epoch count was selected to ensure an observed convergence for each dimenion. 2d trained for 10000 epochs; 10d for 50000 epochs; and 100d for 250000 epochs.
 
 ### Multiple Trials and Data Collection
 
