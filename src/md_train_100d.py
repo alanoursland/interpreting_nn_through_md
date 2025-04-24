@@ -13,6 +13,7 @@ learn_md.set_random_seeds(seed)
 N = 100
 num_samples = 10000
 trials=20
+epochs=250000
 
 results_dir = Path("results/md_100d/")
 models_dir = results_dir / "models"
@@ -34,11 +35,11 @@ for trial in range(trials):
     W, b = learn_md.create_weights_and_biases(N, 2*N, x, device=device)
 
     relu_model, relu_losses, relu_stats = \
-        learn_md.train_model(x, y, MD_ReLU(N, W, b), betas=(0.9, 0.99), device=device)
+        learn_md.train_model(x, y, MD_ReLU(N, W, b), epochs=epochs, betas=(0.9, 0.99), device=device)
     abs_model, abs_losses, abs_stats = \
-        learn_md.train_model(x, y, MD_Abs(N, W[:N], b[:N]), betas=(0.9, 0.99), device=device)
+        learn_md.train_model(x, y, MD_Abs(N, W[:N], b[:N]), epochs=epochs, betas=(0.9, 0.99), device=device)
     sigmoid_model, sigmoid_losses, sigmoid_stats = \
-        learn_md.train_model(x, y, MD_Sigmoid(N, W, b), betas=(0.9, 0.99), device=device)
+        learn_md.train_model(x, y, MD_Sigmoid(N, W, b), epochs=epochs, betas=(0.9, 0.99), device=device)
 
     trial_dir = models_dir / str(trial)
     trial_dir.mkdir(parents=True, exist_ok=True)
