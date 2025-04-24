@@ -176,58 +176,78 @@ def test_sphericity(W, cov, label, verbose=True):
     
     return sphericity_error, eigenvalues
 
-def test_mahalanobis_match(W, cov, label, verbose=True, deduplicate=True, cos_threshold=0.999):
+def detect_mirrored_weights(W, cos_threshold=0.999):
     """
-    Check if W^T W ≈ Σ⁻¹, optionally deduplicating mirror vectors.
+    Detects near-opposite vector pairs (w, -w) in a weight matrix W.
 
     Args:
-        W (Tensor): shape (k, d) from model (e.g., Abs or ReLU)
-        cov (Tensor): shape (d, d) true covariance matrix
-        label (str): name for printouts
-        verbose (bool): whether to show details
-        deduplicate (bool): whether to detect and remove mirrored rows
-        cos_threshold (float): threshold for cosine similarity (~1.0 = mirrored)
+        W (Tensor): shape (n, d) where each row is a weight vector.
+        cos_threshold (float): cosine similarity threshold for "mirror-ness".
 
     Returns:
-        fro_norm (float): Frobenius norm of difference from Σ⁻¹
+        mirrored_pairs (List[Tuple[int, int, float]]): 
+            list of (i, j, cosine_similarity) where w_i ≈ -w_j.
+        used_indices (Set[int]): all indices involved in mirrored pairs.
     """
     W = F.normalize(W, dim=1)
+    n = W.shape[0]
+    mirrored_pairs = []
+    used = set()
 
-    if deduplicate:
-        kept = []
-        used = set()
-        for i in range(W.shape[0]):
-            if i in used:
+    for i in range(n):
+        if i in used:
+            continue
+        wi = W[i]
+        for j in range(i + 1, n):
+            if j in used:
                 continue
-            wi = W[i]
-            keep = True
-            for j in range(i + 1, W.shape[0]):
-                if j in used:
-                    continue
-                wj = W[j]
-                cos_sim = F.cosine_similarity(wi.unsqueeze(0), wj.unsqueeze(0)).item()
-                if abs(cos_sim + 1.0) > (1 - cos_threshold):  # near -1
-                    used.add(j)
-                    keep = True
-                    break
-            if keep:
-                kept.append(wi)
-                used.add(i)
-        W = torch.stack(kept)
-        if verbose:
-            print(f"[{label}] Deduplicated: reduced from {W.shape[0] + len(used) - len(kept)} to {W.shape[0]} rows")
+            wj = W[j]
+            cos_sim = F.cosine_similarity(wi.unsqueeze(0), wj.unsqueeze(0)).item()
+            if cos_sim < -cos_threshold:  # close to -1
+                mirrored_pairs.append((i, j, cos_sim))
+                used.update([i, j])
+                break  # only match each i once
 
-    cov_inv = torch.linalg.inv(cov)
-    M_model = W.T @ W
-    fro_norm = torch.norm(M_model - cov_inv, p='fro').item()
+    return mirrored_pairs, used
 
-    if verbose:
-        print(f"[{label}] Mahalanobis Matrix Match:")
-        print(f"  Frobenius norm ||WᵀW - Σ⁻¹||_F = {fro_norm:.6f}")
-        eigvals = torch.linalg.eigvalsh(M_model).cpu().numpy()
-        print(f"  Eigenvalues of WᵀW: {np.round(eigvals, 4)}")
+def deduplicate_mirrored_weights(W, mirrored_pairs):
+    """
+    Deduplicates mirrored vectors in W by keeping one from each mirrored pair,
+    and including all unpaired vectors.
 
-    return fro_norm
+    Args:
+        W (Tensor): (n, d) matrix of weight vectors.
+        mirrored_pairs (List[Tuple[int, int, float]]): Output from detect_mirrored_weights.
+
+    Returns:
+        deduped_W (Tensor): Reduced set of weight vectors with no mirrored redundancy.
+    """
+    import torch
+
+    # Indices from mirrored pairs (keep first index from each)
+    keep_indices = set(i for (i, _, _) in mirrored_pairs)
+
+    # Indices of all used vectors in mirrored pairs
+    mirrored_indices = set(i for (i, j, _) in mirrored_pairs).union(j for (_, j, _) in mirrored_pairs)
+
+    # Add any unused vectors (i.e., not part of any mirrored pair)
+    all_indices = set(range(W.shape[0]))
+    unused_indices = all_indices - mirrored_indices
+    keep_indices.update(unused_indices)
+
+    # Sort for consistency (optional)
+    keep_indices = sorted(keep_indices)
+
+    return W[keep_indices]
+
+def print_mirrored_summary(name, mirrored_pairs, total):
+    count = len(mirrored_pairs)
+    print(f"{name:<8} | {count:>2} mirrored pairs out of {total:>2} vectors")
+    if count > 0:
+        print(f"{'Idx A':>6} {'Idx B':>6} {'cos(wᵢ, wⱼ)':>12}")
+        print("-" * 26)
+        for i, j, sim in mirrored_pairs:
+            print(f"{i:6d} {j:6d} {sim:12.6f}")
 
 def mahalanobis_distance(x, mean, eigvals_sorted, eigvecs_sorted):
     centered = x - mean  # shape: (num_samples, N)
