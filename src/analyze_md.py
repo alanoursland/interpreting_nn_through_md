@@ -10,7 +10,7 @@ from scipy.optimize import linear_sum_assignment
 import os
 import shutil
 
-from models_md import MD_ReLU, MD_Abs, MD_Sigmoid
+from md_models import MD_ReLU, MD_Abs, MD_Sigmoid
 
 def load_model(model_class, input_dim, path, device=None):
     if device is None:

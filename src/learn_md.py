@@ -8,7 +8,7 @@ from torch.utils.data import TensorDataset, DataLoader
 import time
 import os
 
-from models_md import MD_ReLU, MD_Abs, MD_Sigmoid
+from md_models import MD_ReLU, MD_Abs, MD_Sigmoid
 
 def create_gaussian(dim, device):
     # Create a multivariate normal distribution with random mean in [-10, 10]

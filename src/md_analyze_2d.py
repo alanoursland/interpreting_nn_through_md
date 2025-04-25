@@ -2,7 +2,7 @@ import analyze_md
 import torch
 import learn_md
 
-from models_md import MD_ReLU, MD_Abs, MD_Sigmoid
+from md_models import MD_ReLU, MD_Abs, MD_Sigmoid
 from pathlib import Path
 from collections import defaultdict
 

@@ -2,7 +2,7 @@ import learn_md
 import torch
 
 from pathlib import Path
-from models_md import MD_ReLU, MD_Abs, MD_Sigmoid
+from md_models import MD_ReLU, MD_Abs, MD_Sigmoid
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
