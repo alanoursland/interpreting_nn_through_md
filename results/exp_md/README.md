@@ -1,4 +1,4 @@
-# Experiment: Learning Mahalanobis Distance with Neural Networks
+# Results: Learning Mahalanobis Distance with Neural Networks
 
 ## Overview
 
